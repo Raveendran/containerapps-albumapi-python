@@ -3,38 +3,28 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+import os
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods="GET",
-    allow_headers=["*"]
-)
+# Azure Key Vault URI and secret name
+key_vault_uri = "https://kv-apix-dev-ae-01.vault.azure.net/"
+secret_name = "react-api-dummy-token"
 
-class Album():
-    def __init__(self, id, title, artist, price, image_url):
-         self.id = id
-         self.title = title
-         self.artist = artist
-         self.price = price
-         self.image_url = image_url
+# Use the managed identity of the Azure Container Instance for authentication
+credential = DefaultAzureCredential()
 
-albums = [ 
-    Album(1, "You, Me and an App Id", "Daprize", 10.99, "https://aka.ms/albums-daprlogo"),
-    Album(2, "Seven Revision Army", "The Blue-Green Stripes", 13.99, "https://aka.ms/albums-containerappslogo"),
-    Album(3, "Scale It Up", "KEDA Club", 13.99, "https://aka.ms/albums-kedalogo"),
-    Album(4, "Lost in Translation", "MegaDNS", 12.99,"https://aka.ms/albums-envoylogo"),
-    Album(5, "Lock Down Your Love", "V is for VNET", 12.99, "https://aka.ms/albums-vnetlogo"),
-    Album(6, "Sweet Container O' Mine", "Guns N Probeses", 14.99, "https://aka.ms/albums-containerappslogo")
-]
+# Create a SecretClient using the Key Vault URI and credential
+client = SecretClient(vault_url=key_vault_uri, credential=credential)
 
-@app.get("/")
-def read_root():
-    return {"Access /albums to see the list of albums"}
+# Retrieve the secret value from the Key Vault
+secret_value = client.get_secret(secret_name).value
+print(f"Secret Value: {secret_value}")
 
+# Example usage of the secret (replace with your application logic)
+# For demonstration purposes, this example simply prints the secret value
+print("Hello from Azure Key Vault!")
+print(f"The secret value is: {secret_value}")
 
-@app.get("/albums")
-def get_albums():
-    return albums
+# Keep the container running
+input("Press Enter to exit...")
