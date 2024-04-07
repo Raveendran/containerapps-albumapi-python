@@ -3,10 +3,6 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# ravee added
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
-
 app = FastAPI()
 
 app.add_middleware(
